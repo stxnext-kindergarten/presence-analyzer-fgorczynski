@@ -7,7 +7,9 @@ import json
 import datetime
 import unittest
 
-from presence_analyzer import main, views, utils
+from presence_analyzer import main
+from presence_analyzer import views  # pylint: disable=unused-import
+from presence_analyzer import utils
 
 TEST_DATA_CSV = os.path.join(
     os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_data.csv'
@@ -54,7 +56,34 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
 
     def test_mean_time_weekday_view(self):
         """
-        JSON response of mean time weekday for specified user
+        JSON response of mean time weekday for specified user.
+        """
+        resp = self.client.get('/api/v1/mean_time_weekday/')
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'text/html')
+
+        # user with specified user_id - wrong param type - does not exist
+        resp = self.client.get('/api/v1/mean_time_weekday/some-text')
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'text/html')
+
+        # user with specified user_id does not exist
+        resp = self.client.get('/api/v1/mean_time_weekday/999')
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'text/html')
+
+        # user with specified user_id exist
+        resp = self.client.get('/api/v1/mean_time_weekday/10')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data)
+        self.assertEqual(len(data), 7)
+        self.assertEqual(data[0][0], u'Mon')
+        self.assertEqual(str(type(data[1][0])), "<type 'unicode'>")
+
+    def test_presence_weekday_view(self):
+        """
+        JSON response of presence weekday for specified user.
         """
         # no user_id parameter defined
         resp = self.client.get('/api/v1/presence_weekday/')
@@ -76,17 +105,10 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data)
-        #import pdb; pdb.set_trace()
         self.assertEqual(len(data), 8)
         self.assertEqual(data[0], [u'Weekday', u'Presence (s)'])
         self.assertEqual(str(type(data[1][0])), "<type 'unicode'>")
         self.assertEqual(str(type(data[1][1])), "<type 'int'>")
-
-    def test_presence_weekday_view(self):
-        """
-        JSON response of presence weekday for specified user
-        """
-        pass
 
 
 class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
@@ -108,7 +130,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
 
     def test_jsonify(self):
         """
-        Test for valid JSON return
+        Test for valid JSON return.
         """
         pass
 
@@ -129,17 +151,26 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
 
     def test_group_by_weekday(self):
         """
-        Grouping by weekday
+        Grouping by weekday.
         """
         pass
 
     def test_seconds_since_midnight(self):
+        """
+        Test seconds since midnight.
+        """
         pass
 
     def test_interval(self):
+        """
+        Test time interval.
+        """
         pass
 
     def test_mean(self):
+        """
+        Test mean.
+        """
         pass
 
 
