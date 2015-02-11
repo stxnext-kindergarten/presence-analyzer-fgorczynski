@@ -9,7 +9,6 @@ import unittest
 
 from presence_analyzer import main, views, utils
 
-
 TEST_DATA_CSV = os.path.join(
     os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_data.csv'
 )
@@ -53,6 +52,40 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(len(data), 2)
         self.assertDictEqual(data[0], {u'user_id': 10, u'name': u'User 10'})
 
+    def test_mean_time_weekday_view(self):
+        """
+        JSON response of mean time weekday for specified user
+        """
+        # no user_id parameter defined
+        resp = self.client.get('/api/v1/presence_weekday/')
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'text/html')
+
+        # user with specified user_id - wrong param type - does not exist
+        resp = self.client.get('/api/v1/presence_weekday/some-text')
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'text/html')
+
+        # user with specified user_id does not exist
+        resp = self.client.get('/api/v1/presence_weekday/999')
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'text/html')
+
+        # user with specified user_id exist
+        resp = self.client.get('/api/v1/presence_weekday/10')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data)
+        self.assertEqual(len(data), 8)
+        self.assertDictEqual(data[0], [u'Weekday', u'Presence (s)'])
+        self.assertDictEqual(data[1], [u'Mon', 1634546])
+
+    def test_presence_weekday_view(self):
+        """
+        JSON response of presence weekday for specified user
+        """
+        pass
+
 
 class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
     """
@@ -71,6 +104,12 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         """
         pass
 
+    def test_jsonify(self):
+        """
+        Test for valid JSON return
+        """
+        pass
+
     def test_get_data(self):
         """
         Test parsing of CSV file.
@@ -86,6 +125,21 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
             datetime.time(9, 39, 5)
         )
 
+    def test_group_by_weekday(self):
+        """
+        Grouping by weekday
+        """
+        pass
+
+    def test_seconds_since_midnight(self):
+        pass
+
+    def test_interval(self):
+        pass
+
+    def test_mean(self):
+        pass
+
 
 def suite():
     """
@@ -95,7 +149,6 @@ def suite():
     base_suite.addTest(unittest.makeSuite(PresenceAnalyzerViewsTestCase))
     base_suite.addTest(unittest.makeSuite(PresenceAnalyzerUtilsTestCase))
     return base_suite
-
 
 if __name__ == '__main__':
     unittest.main()
