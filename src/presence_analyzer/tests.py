@@ -10,9 +10,20 @@ import unittest
 from presence_analyzer import main
 from presence_analyzer import views  # pylint: disable=unused-import
 from presence_analyzer import utils
+from presence_analyzer.main import app
+
+from presence_analyzer.utils import jsonify
 
 TEST_DATA_CSV = os.path.join(
     os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_data.csv'
+)
+TEST_WRONG_DATA_CSV = os.path.join(
+    os.path.dirname(__file__), '..', '..', 'runtime', 'data',
+    'test_wrong_data.csv'
+)
+TEST_EMPTY_DATA_CSV = os.path.join(
+    os.path.dirname(__file__), '..', '..', 'runtime', 'data',
+    'test_empty_data.csv'
 )
 
 
@@ -128,16 +139,73 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         """
         pass
 
+    @classmethod
+    def _sample_data(cls):
+        """
+        Return sample data object:
+
+        {
+            'user_id': {
+                datetime.date(2013, 10, 1): {
+                    'start': datetime.time(9, 0),
+                    'end': datetime.time(17, 30)
+                }
+            }
+        }
+        """
+        return {
+            'user_id': {
+                str(datetime.date(2013, 10, 1)): {
+                    'start': str(datetime.time(9, 0, 0)),
+                    'end': str(datetime.time(17, 30, 0)),
+                },
+            }
+        }
+
+    @classmethod
+    @jsonify
+    def _sample_data_jsonified(cls):  # pylint disable=no-self-use
+        """
+        Return sample data object:
+
+        {
+            'user_id':{
+                datetime.date(2013, 10, 1): {
+                    'start': datetime.time(9, 0),
+                    'end': datetime.time(17, 30)
+                }
+            }
+        }
+        """
+        return {
+            'user_id': {
+                str(datetime.date(2013, 10, 1)): {
+                    'start': str(datetime.time(9, 0, 0)),
+                    'end': str(datetime.time(17, 30, 0)),
+                },
+            }
+        }
+
     def test_jsonify(self):
         """
         Test for valid JSON return.
         """
-        pass
+        # Just sample data
+        fixture = self._sample_data()
+        self.assertIsInstance(fixture, dict)
+        self.assertGreater(len(fixture), 0)
+
+        # Sample data after jsonified decorator
+        jsonified = self._sample_data_jsonified()
+        self.assertIsInstance(jsonified.data, str)
+        self.assertEqual(jsonified.status_code, 200)
+        self.assertEqual(jsonified.content_type, 'application/json')
 
     def test_get_data(self):
         """
         Test parsing of CSV file.
         """
+        # correcy portion of data
         data = utils.get_data()
         self.assertIsInstance(data, dict)
         self.assertItemsEqual(data.keys(), [10, 11])
@@ -148,6 +216,23 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
             data[10][sample_date]['start'],
             datetime.time(9, 39, 5)
         )
+
+        tmp_data = app.config['DATA_CSV']
+
+        # empty data
+        app.config.update({'DATA_CSV': TEST_EMPTY_DATA_CSV})
+        data = utils.get_data()
+        self.assertEqual(len(data[10]), 3)
+        self.assertEqual(len(data[11]), 4)
+
+        # wrong data fixtures
+        app.config.update({'DATA_CSV': TEST_WRONG_DATA_CSV})
+        data = utils.get_data()
+        self.assertEqual(len(data[10]), 2)
+        self.assertEqual(len(data[11]), 5)
+
+        # recover valid data
+        main.app.config.update({'DATA_CSV': tmp_data})
 
     def test_group_by_weekday(self):
         """
