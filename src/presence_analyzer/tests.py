@@ -76,9 +76,11 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data)
+        #import pdb; pdb.set_trace()
         self.assertEqual(len(data), 8)
-        self.assertDictEqual(data[0], [u'Weekday', u'Presence (s)'])
-        self.assertDictEqual(data[1], [u'Mon', 1634546])
+        self.assertEqual(data[0], [u'Weekday', u'Presence (s)'])
+        self.assertEqual(str(type(data[1][0])), "<type 'unicode'>")
+        self.assertEqual(str(type(data[1][1])), "<type 'int'>")
 
     def test_presence_weekday_view(self):
         """
