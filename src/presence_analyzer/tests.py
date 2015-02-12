@@ -11,7 +11,6 @@ from presence_analyzer import main
 from presence_analyzer import views  # pylint: disable=unused-import
 from presence_analyzer import utils
 from presence_analyzer.main import app
-
 from presence_analyzer.utils import jsonify
 
 TEST_DATA_CSV = os.path.join(
@@ -186,16 +185,30 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
             }
         }
 
+    @classmethod
+    def _sample_user_data(cls):
+        """
+        Return sample user fixture data.
+        """
+        return {
+            datetime.date(2013, 10, 1): {
+                'start': datetime.time(9, 0, 0),
+                'end': datetime.time(17, 30, 0),
+            },
+            datetime.date(2013, 10, 2): {
+                'start': datetime.time(8, 30, 0),
+                'end': datetime.time(16, 45, 0),
+            },
+        }
+
     def test_jsonify(self):
         """
         Test for valid JSON return.
         """
-        # Just sample data
         fixture = self._sample_data()
         self.assertIsInstance(fixture, dict)
         self.assertGreater(len(fixture), 0)
 
-        # Sample data after jsonified decorator
         jsonified = self._sample_data_jsonified()
         self.assertIsInstance(jsonified.data, str)
         self.assertEqual(jsonified.status_code, 200)
@@ -236,27 +249,55 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
 
     def test_group_by_weekday(self):
         """
-        Grouping by weekday.
+        Test grouping by weekday.
         """
-        pass
+        self.assertTrue(utils.group_by_weekday([]),
+                        msg="Wrong list or type for empty parameter.")
+        self.assertEquals(len(utils.group_by_weekday([])), 7,
+                          msg="Wrong empty item list elements.")
+
+        data = self._sample_user_data()
+        self.assertEquals(len(utils.group_by_weekday(data)), 7,
+                          msg="Wrong item list elements.")
+        self.assertEquals(utils.group_by_weekday(data),
+                          [[], [30600], [29700], [], [], [], []],
+                          msg="Wrong weekday values.")
 
     def test_seconds_since_midnight(self):
         """
         Test seconds since midnight.
         """
-        pass
+        time_fixture = datetime.time(14, 30)
+        self.assertEqual(utils.seconds_since_midnight(time_fixture), 52200)
+        time_fixture = datetime.time(0, 0)
+        self.assertEqual(utils.seconds_since_midnight(time_fixture), 0)
 
     def test_interval(self):
         """
         Test time interval.
         """
-        pass
+        # start < end
+        start = datetime.time(9, 30)
+        end = datetime.time(12, 30)
+        self.assertEqual(utils.interval(start, end), 10800)  # 3 hours
+
+        # start == end
+        start = datetime.time(10, 45)
+        end = datetime.time(10, 45)
+        self.assertEqual(utils.interval(start, end), 0)  # 0 hours
+
+        # start > end
+        start = datetime.time(14, 45)
+        end = datetime.time(10, 45)
+        self.assertEqual(utils.interval(start, end), - 14400)  # -4 hours
 
     def test_mean(self):
         """
         Test mean.
         """
-        pass
+        self.assertEqual(utils.mean([]), 0)
+        self.assertEqual(utils.mean([1.7, 2, 3.0, 4, 5.99999]), 3.339998)
+        self.assertEqual(utils.mean([0.1, 0.3]), 0.2)
 
 
 def suite():
