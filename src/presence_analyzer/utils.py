@@ -8,6 +8,7 @@ from json import dumps
 from functools import wraps
 from datetime import datetime
 
+
 from flask import Response
 
 from presence_analyzer.main import app
@@ -67,7 +68,6 @@ def get_data():
                 log.debug('Problem with line %d: ', i, exc_info=True)
 
             data.setdefault(user_id, {})[date] = {'start': start, 'end': end}
-
     return data
 
 
@@ -81,6 +81,50 @@ def group_by_weekday(items):
         end = items[date]['end']
         result[date.weekday()].append(interval(start, end))
     return result
+
+
+def group_user_avgs_weekday(items):
+    """
+    Get items collection.
+    Return averages for every week days.
+    """
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    averages = [{'starts': 0, 'ends': 0, 'count': 0} for day in days]
+    for date in items:
+        start = items[date]['start']
+        end = items[date]['end']
+        averages[date.weekday()]['starts'] += seconds_since_midnight(start)
+        averages[date.weekday()]['ends'] += seconds_since_midnight(end)
+        averages[date.weekday()]['count'] += 1
+
+    result = [[], [], [], [], [], [], []]
+    for index, day in enumerate(averages):
+        result[index].append(days[index])
+        if day.get('count'):
+            start = int(round(day.get('starts')) / day.get('count'))
+            end = int(round(day.get('ends')) / day.get('count'))
+            start_hour, start_minute, start_second = seconds_to_time(start)
+            end_hour, end_minute, end_second = seconds_to_time(end)
+            start = datetime(1, 1, 1, start_hour, start_minute, start_second)
+            end = datetime(1, 1, 1, end_hour, end_minute, end_second)
+            result[index].append(str(start))
+            result[index].append(str(end))
+        else:
+            result[index].append(str(datetime(1, 1, 1, 0, 0, 0)))
+            result[index].append(str(datetime(1, 1, 1, 0, 0, 0)))
+    # remove empty days (working and nonworking days)
+    result = [day for day in result if day[1] != day[2]]
+    return result
+
+
+def seconds_to_time(seconds):
+    """
+    Get number of seconts since midnight.
+    Return hours, minute, seconds representation.
+    """
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    return (hours, minutes, seconds)
 
 
 def seconds_since_midnight(time):

@@ -7,7 +7,8 @@ import json
 import datetime
 import unittest
 
-from presence_analyzer import main, views, utils
+from presence_analyzer import main, utils
+from presence_analyzer import views  # pylint: disable=unused-import
 
 
 TEST_DATA_CSV = os.path.join(
@@ -53,6 +54,48 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(len(data), 2)
         self.assertDictEqual(data[0], {u'user_id': 10, u'name': u'User 10'})
 
+    def test_start_end_presence(self):
+        """
+        Test average user presence by weekday
+        """
+        resp = self.client.get('/api/v1/presence_start_end')
+        self.assertEqual(
+            resp.status_code,
+            404,
+            msg="Average user presence - Page not found."
+        )
+        self.assertEqual(
+            resp.content_type,
+            'text/html',
+            msg="Average user presence - Wrong content type."
+        )
+
+        # test for user with ID - user exists
+        resp = self.client.get('/api/v1/presence_start_end/10')
+        self.assertEqual(
+            resp.status_code,
+            200,
+            msg="Average user presence - Correct HTTP return."
+        )
+        self.assertEqual(
+            resp.content_type,
+            'application/json',
+            msg="Average user presence - Wrong content type."
+        )
+
+        # test for user with ID - user exists
+        resp = self.client.get('/api/v1/presence_start_end/9999')
+        self.assertEqual(
+            resp.status_code,
+            404,
+            msg="Average user presence - User with specified ID not found."
+        )
+        self.assertEqual(
+            resp.content_type,
+            'text/html',
+            msg="Average user presence - Wrong content type."
+        )
+
 
 class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
     """
@@ -84,6 +127,32 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         self.assertEqual(
             data[10][sample_date]['start'],
             datetime.time(9, 39, 5)
+        )
+
+    def test_group_user_avgs_weekday(self):
+        """
+        Test valid object return with user average working hours for whole
+        week.
+        """
+        data = utils.get_data()
+        self.assertIsInstance(data, dict)
+        self.assertItemsEqual(data.keys(), [10, 11])
+        result = utils.group_user_avgs_weekday(data[10])
+        expected = [
+            ['Tue', '0001-01-01 09:39:05', '0001-01-01 17:59:52'],
+            ['Wed', '0001-01-01 09:19:52', '0001-01-01 16:07:37'],
+            ['Thu', '0001-01-01 10:48:46', '0001-01-01 17:23:51']
+        ]
+        self.assertItemsEqual(result, expected, msg="Wrong dates for user 10.")
+
+    def test_seconds_to_time(self):
+        """
+        Test seconds since midnight to time conversion.
+        """
+        self.assertItemsEqual(
+            utils.seconds_to_time(37230),
+            (10, 20, 30),
+            msg="Incorrect conversion from seconds to time representation."
         )
 
 
