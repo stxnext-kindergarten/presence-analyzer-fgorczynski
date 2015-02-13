@@ -89,7 +89,7 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         data = json.loads(resp.data)
         self.assertEqual(len(data), 7)
         self.assertEqual(data[0][0], u'Mon')
-        self.assertEqual(str(type(data[1][0])), "<type 'unicode'>")
+        self.assertTrue(isinstance(data[1][0], basestring))
 
     def test_presence_weekday_view(self):
         """
@@ -117,8 +117,8 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         data = json.loads(resp.data)
         self.assertEqual(len(data), 8)
         self.assertEqual(data[0], [u'Weekday', u'Presence (s)'])
-        self.assertEqual(str(type(data[1][0])), "<type 'unicode'>")
-        self.assertEqual(str(type(data[1][1])), "<type 'int'>")
+        self.assertTrue(isinstance(data[1][0], basestring))
+        self.assertTrue(isinstance(data[1][1], int))
 
 
 class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
@@ -251,17 +251,27 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         """
         Test grouping by weekday.
         """
-        self.assertTrue(utils.group_by_weekday([]),
-                        msg="Wrong list or type for empty parameter.")
-        self.assertEquals(len(utils.group_by_weekday([])), 7,
-                          msg="Wrong empty item list elements.")
+        self.assertTrue(
+            utils.group_by_weekday([]),
+            msg="Wrong list or type for empty parameter."
+        )
+        self.assertEquals(
+            len(utils.group_by_weekday([])),
+            7,
+            msg="Wrong empty item list elements."
+        )
 
         data = self._sample_user_data()
-        self.assertEquals(len(utils.group_by_weekday(data)), 7,
-                          msg="Wrong item list elements.")
-        self.assertEquals(utils.group_by_weekday(data),
-                          [[], [30600], [29700], [], [], [], []],
-                          msg="Wrong weekday values.")
+        self.assertEquals(
+            len(utils.group_by_weekday(data)),
+            7,
+            msg="Wrong item list elements."
+        )
+        self.assertEquals(
+            utils.group_by_weekday(data),
+            [[], [30600], [29700], [], [], [], []],
+            msg="Wrong weekday values."
+        )
 
     def test_seconds_since_midnight(self):
         """
