@@ -4,9 +4,9 @@ Helper functions used in views.
 """
 
 import csv
-from json import dumps
-from functools import wraps
 from datetime import datetime
+from functools import wraps
+from json import dumps
 from flask import Response
 from presence_analyzer.main import app
 
@@ -118,10 +118,10 @@ def group_user_avgs_weekday(items):
 
         :days Dictrionary with user specified working hours.
         """
-        result = [[], [], [], [], [], [], []]
+        result = {}
         for day, stats in days.iteritems():
-            index = DAYS.index(day)
-            result[index].append(day)
+            if not result.get(day):
+                result[day] = []
             if stats.get('count'):
                 start = int(round(stats.get('starts')) / stats.get('count'))
                 end = int(round(stats.get('ends')) / stats.get('count'))
@@ -129,14 +129,18 @@ def group_user_avgs_weekday(items):
                 end_hour, end_minute, end_second = seconds_to_time(end)
                 start = create_datetime(start_hour, start_minute, start_second)
                 end = create_datetime(end_hour, end_minute, end_second)
-                result[index].append(str(start))
-                result[index].append(str(end))
+                result[day].append(str(start))
+                result[day].append(str(end))
             else:
-                result[index].append(DEFAULT_DATETIME)
-                result[index].append(DEFAULT_DATETIME)
+                result[day].append(DEFAULT_DATETIME)
+                result[day].append(DEFAULT_DATETIME)
         # remove empty days (working and nonworking days)
-        result = [day for day in result if day[1] != day[2]]
+        result = [
+            [day, result[day][0], result[day][1]]
+            for day in result.keys() if result[day][0] != result[day][1]
+        ]
         return result
+
     days = build_days()
     result = build_result(days)
     return result

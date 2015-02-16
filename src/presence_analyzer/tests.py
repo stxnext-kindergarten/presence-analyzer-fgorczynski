@@ -2,9 +2,9 @@
 """
 Presence analyzer unit tests.
 """
-import os.path
-import json
 import datetime
+import json
+import os.path
 import unittest
 from presence_analyzer import (  # pylint: disable=unused-import
     main,
