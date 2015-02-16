@@ -7,14 +7,14 @@ import csv
 from json import dumps
 from functools import wraps
 from datetime import datetime
-
-
 from flask import Response
-
 from presence_analyzer.main import app
 
 import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+DEFAULT_DATETIME = str(datetime(1, 1, 1, 0, 0, 0))
 
 
 def jsonify(function):
@@ -88,32 +88,57 @@ def group_user_avgs_weekday(items):
     Get items collection.
     Return averages for every week days.
     """
-    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    averages = [{'starts': 0, 'ends': 0, 'count': 0} for day in days]
-    for date in items:
-        start = items[date]['start']
-        end = items[date]['end']
-        averages[date.weekday()]['starts'] += seconds_since_midnight(start)
-        averages[date.weekday()]['ends'] += seconds_since_midnight(end)
-        averages[date.weekday()]['count'] += 1
+    def create_datetime(hours, minutes, seconds):
+        """
+        Create datetime object for specified hours/minutes/seconds.
 
-    result = [[], [], [], [], [], [], []]
-    for index, day in enumerate(averages):
-        result[index].append(days[index])
-        if day.get('count'):
-            start = int(round(day.get('starts')) / day.get('count'))
-            end = int(round(day.get('ends')) / day.get('count'))
-            start_hour, start_minute, start_second = seconds_to_time(start)
-            end_hour, end_minute, end_second = seconds_to_time(end)
-            start = datetime(1, 1, 1, start_hour, start_minute, start_second)
-            end = datetime(1, 1, 1, end_hour, end_minute, end_second)
-            result[index].append(str(start))
-            result[index].append(str(end))
-        else:
-            result[index].append(str(datetime(1, 1, 1, 0, 0, 0)))
-            result[index].append(str(datetime(1, 1, 1, 0, 0, 0)))
-    # remove empty days (working and nonworking days)
-    result = [day for day in result if day[1] != day[2]]
+        :hours int
+        :minutes int
+        :seconds int
+        """
+        return datetime(1, 1, 1, hours, minutes, seconds)
+
+    def build_days():
+        """
+        Build days dictionary with start/end statistics.
+        """
+        days = {day: {'starts': 0, 'ends': 0, 'count': 0} for day in DAYS}
+        for date in items:
+            start = items[date]['start']
+            end = items[date]['end']
+            weekday = date.weekday()
+            days[DAYS[weekday]]['starts'] += seconds_since_midnight(start)
+            days[DAYS[weekday]]['ends'] += seconds_since_midnight(end)
+            days[DAYS[weekday]]['count'] += 1
+        return days
+
+    def build_result(days):
+        """
+        Build result list using days dictionary.
+
+        :days Dictrionary with user specified working hours.
+        """
+        result = [[], [], [], [], [], [], []]
+        for day, stats in days.iteritems():
+            index = DAYS.index(day)
+            result[index].append(day)
+            if stats.get('count'):
+                start = int(round(stats.get('starts')) / stats.get('count'))
+                end = int(round(stats.get('ends')) / stats.get('count'))
+                start_hour, start_minute, start_second = seconds_to_time(start)
+                end_hour, end_minute, end_second = seconds_to_time(end)
+                start = create_datetime(start_hour, start_minute, start_second)
+                end = create_datetime(end_hour, end_minute, end_second)
+                result[index].append(str(start))
+                result[index].append(str(end))
+            else:
+                result[index].append(DEFAULT_DATETIME)
+                result[index].append(DEFAULT_DATETIME)
+        # remove empty days (working and nonworking days)
+        result = [day for day in result if day[1] != day[2]]
+        return result
+    days = build_days()
+    result = build_result(days)
     return result
 
 

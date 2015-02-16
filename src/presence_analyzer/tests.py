@@ -6,10 +6,11 @@ import os.path
 import json
 import datetime
 import unittest
-
-from presence_analyzer import main, utils
-from presence_analyzer import views  # pylint: disable=unused-import
-
+from presence_analyzer import (  # pylint: disable=unused-import
+    main,
+    utils,
+    views,
+)
 
 TEST_DATA_CSV = os.path.join(
     os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_data.csv'
@@ -54,22 +55,10 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(len(data), 2)
         self.assertDictEqual(data[0], {u'user_id': 10, u'name': u'User 10'})
 
-    def test_start_end_presence(self):
+    def test_start_end_presence_correct(self):
         """
-        Test average user presence by weekday
+        Test average user presence by weekday - correct data.
         """
-        resp = self.client.get('/api/v1/presence_start_end')
-        self.assertEqual(
-            resp.status_code,
-            404,
-            msg="Average user presence - Page not found."
-        )
-        self.assertEqual(
-            resp.content_type,
-            'text/html',
-            msg="Average user presence - Wrong content type."
-        )
-
         # test for user with ID - user exists
         resp = self.client.get('/api/v1/presence_start_end/10')
         self.assertEqual(
@@ -83,7 +72,23 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
             msg="Average user presence - Wrong content type."
         )
 
-        # test for user with ID - user exists
+    def test_start_end_presence_wrong(self):
+        """
+        Test average user presence by weekday - incorrect data.
+        """
+        resp = self.client.get('/api/v1/presence_start_end')
+        self.assertEqual(
+            resp.status_code,
+            404,
+            msg="Average user presence - Page not found."
+        )
+        self.assertEqual(
+            resp.content_type,
+            'text/html',
+            msg="Average user presence - Wrong content type."
+        )
+
+        # test for user with ID - user not exists
         resp = self.client.get('/api/v1/presence_start_end/9999')
         self.assertEqual(
             resp.status_code,
