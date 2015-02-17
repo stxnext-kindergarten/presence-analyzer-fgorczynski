@@ -1,1 +1,7 @@
 *.un~
+.installed.cfg
+bin/
+develop-eggs/
+eggs/
+parts/
+src/presence_analyzer.egg-info/
