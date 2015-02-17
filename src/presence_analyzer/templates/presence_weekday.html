@@ -1,0 +1,52 @@
+<%inherit file="base.html"/>
+
+<%block name="title">Presence analyzer - Presence by weekday</%block>
+
+<%block name="header">
+<div id="header">
+    <h1>Presence analyzer</h1>
+    
+    <ul>
+        <li id="selected"><a href="${url_for('weekday')}">Presence by weekday</a></li>
+        <li><a href="${url_for('mean_time')}">Presence mean time</a></li>
+        <li><a href="${url_for('startend')}">Presence start-end</a></li>
+    </ul>
+</div>
+</%block>
+
+<%block name="scripts">
+${parent.scripts()}
+<script>
+    google.load("visualization", "1", {packages:["corechart"], 'language': 'en'});
+
+    (function($) {
+        $(document).ready(function(){
+            var loading = $('#loading');
+            $.getJSON("/api/v1/users", function(result) {
+                var dropdown = $("#user_id");
+                $.each(result, function(item) {
+                    dropdown.append($("<option />").val(this.user_id).text(this.name));
+                });
+                dropdown.show();
+                loading.hide();
+            });
+            $('#user_id').change(function(){
+                var selected_user = $("#user_id").val();
+                var chart_div = $('#chart_div');
+                if(selected_user) {
+                    loading.show();
+                    chart_div.hide();
+                    $.getJSON("/api/v1/presence_weekday/"+selected_user, function(result) {
+                        var data = google.visualization.arrayToDataTable(result);
+                        var options = {};
+                        chart_div.show();
+                        loading.hide();
+                        var chart = new google.visualization.PieChart(chart_div[0]);
+                        chart.draw(data, options);
+                    });
+                }
+            });
+        });
+    })(jQuery);
+</script>
+</%block>
