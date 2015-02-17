@@ -4,16 +4,17 @@ Helper functions used in views.
 """
 
 import csv
-from json import dumps
-from functools import wraps
 from datetime import datetime
-
+from functools import wraps
+from json import dumps
 from flask import Response
-
 from presence_analyzer.main import app
 
 import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+DEFAULT_DATETIME = str(datetime(1, 1, 1, 0, 0, 0))
 
 
 def jsonify(function):
@@ -67,7 +68,6 @@ def get_data():
                 log.debug('Problem with line %d: ', i, exc_info=True)
 
             data.setdefault(user_id, {})[date] = {'start': start, 'end': end}
-
     return data
 
 
@@ -81,6 +81,78 @@ def group_by_weekday(items):
         end = items[date]['end']
         result[date.weekday()].append(interval(start, end))
     return result
+
+
+def group_user_avgs_weekday(items):
+    """
+    Get items collection.
+    Return averages for every week days.
+    """
+    def create_datetime(time):
+        """
+        Create datetime object for specified time.
+
+        :time int
+        """
+        hour, minute, second = seconds_to_time(time)
+        return str(
+            datetime(1, 1, 1, hour, minute, second)
+        )
+
+    def build_days():
+        """
+        Build days dictionary with start/end statistics.
+        """
+        days = {day: {'starts': 0, 'ends': 0, 'count': 0} for day in DAYS}
+        for date in items:
+            start = items[date]['start']
+            end = items[date]['end']
+            weekday = date.weekday()
+            days[DAYS[weekday]]['starts'] += seconds_since_midnight(start)
+            days[DAYS[weekday]]['ends'] += seconds_since_midnight(end)
+            days[DAYS[weekday]]['count'] += 1
+        return days
+
+    def build_result(days):
+        """
+        Build result list using days dictionary.
+
+        :days Dictrionary with user specified working hours.
+        """
+        result = {}
+        for day, stats in days.iteritems():
+            if not result.get(day):
+                result[day] = {}
+            if stats.get('count'):
+                result[day]['start'] = create_datetime(
+                    int(round(stats.get('starts')) / stats.get('count'))
+                )
+                result[day]['end'] = create_datetime(
+                    int(round(stats.get('ends')) / stats.get('count'))
+                )
+            else:
+                result[day]['start'] = DEFAULT_DATETIME
+                result[day]['end'] = DEFAULT_DATETIME
+        # remove empty days (working and nonworking days)
+        result = [
+            (day, result[day]['start'], result[day]['end'])
+            for day in result.keys()
+            if result[day]['start'] != result[day]['end']
+        ]
+        return result
+
+    days = build_days()
+    return build_result(days)
+
+
+def seconds_to_time(seconds):
+    """
+    Get number of seconts since midnight.
+    Return hours, minute, seconds representation.
+    """
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    return (hours, minutes, seconds)
 
 
 def seconds_since_midnight(time):
