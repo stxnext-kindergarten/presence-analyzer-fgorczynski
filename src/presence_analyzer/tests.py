@@ -287,9 +287,9 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         self.assertItemsEqual(data.keys(), [10, 11])
         result = utils.group_user_avgs_weekday(data[10])
         expected = [
-            ['Tue', '0001-01-01 09:39:05', '0001-01-01 17:59:52'],
-            ['Wed', '0001-01-01 09:19:52', '0001-01-01 16:07:37'],
-            ['Thu', '0001-01-01 10:48:46', '0001-01-01 17:23:51']
+            ('Tue', '0001-01-01 09:39:05', '0001-01-01 17:59:52'),
+            ('Wed', '0001-01-01 09:19:52', '0001-01-01 16:07:37'),
+            ('Thu', '0001-01-01 10:48:46', '0001-01-01 17:23:51'),
         ]
         self.assertItemsEqual(result, expected, msg="Wrong dates for user 10.")
 

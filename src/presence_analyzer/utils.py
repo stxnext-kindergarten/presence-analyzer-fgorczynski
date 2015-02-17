@@ -88,15 +88,16 @@ def group_user_avgs_weekday(items):
     Get items collection.
     Return averages for every week days.
     """
-    def create_datetime(hours, minutes, seconds):
+    def create_datetime(time):
         """
-        Create datetime object for specified hours/minutes/seconds.
+        Create datetime object for specified time.
 
-        :hours int
-        :minutes int
-        :seconds int
+        :time int
         """
-        return datetime(1, 1, 1, hours, minutes, seconds)
+        hour, minute, second = seconds_to_time(time)
+        return str(
+            datetime(1, 1, 1, hour, minute, second)
+        )
 
     def build_days():
         """
@@ -121,29 +122,27 @@ def group_user_avgs_weekday(items):
         result = {}
         for day, stats in days.iteritems():
             if not result.get(day):
-                result[day] = []
+                result[day] = {}
             if stats.get('count'):
-                start = int(round(stats.get('starts')) / stats.get('count'))
-                end = int(round(stats.get('ends')) / stats.get('count'))
-                start_hour, start_minute, start_second = seconds_to_time(start)
-                end_hour, end_minute, end_second = seconds_to_time(end)
-                start = create_datetime(start_hour, start_minute, start_second)
-                end = create_datetime(end_hour, end_minute, end_second)
-                result[day].append(str(start))
-                result[day].append(str(end))
+                result[day]['start'] = create_datetime(
+                    int(round(stats.get('starts')) / stats.get('count'))
+                )
+                result[day]['end'] = create_datetime(
+                    int(round(stats.get('ends')) / stats.get('count'))
+                )
             else:
-                result[day].append(DEFAULT_DATETIME)
-                result[day].append(DEFAULT_DATETIME)
+                result[day]['start'] = DEFAULT_DATETIME
+                result[day]['end'] = DEFAULT_DATETIME
         # remove empty days (working and nonworking days)
         result = [
-            [day, result[day][0], result[day][1]]
-            for day in result.keys() if result[day][0] != result[day][1]
+            (day, result[day]['start'], result[day]['end'])
+            for day in result.keys()
+            if result[day]['start'] != result[day]['end']
         ]
         return result
 
     days = build_days()
-    result = build_result(days)
-    return result
+    return build_result(days)
 
 
 def seconds_to_time(seconds):
