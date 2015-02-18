@@ -7,10 +7,11 @@ import csv
 from datetime import datetime
 from functools import wraps
 from json import dumps
+import logging
 from flask import Response
+
 from presence_analyzer.main import app
 
-import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']

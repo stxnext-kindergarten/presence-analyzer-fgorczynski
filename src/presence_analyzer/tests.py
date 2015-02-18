@@ -4,6 +4,8 @@ Presence analyzer unit tests.
 """
 import datetime
 import json
+import lxml
+from lxml import etree
 import os.path
 import unittest
 from presence_analyzer import (  # pylint: disable=unused-import
@@ -11,6 +13,7 @@ from presence_analyzer import (  # pylint: disable=unused-import
     utils,
     views,
 )
+# from presence_analyzer.config import *
 from presence_analyzer.main import app
 from presence_analyzer.utils import jsonify
 
@@ -178,6 +181,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         Before each test, set up a environment.
         """
         main.app.config.update({'DATA_CSV': TEST_DATA_CSV})
+        self.client = main.app.test_client()
 
     def tearDown(self):
         """
@@ -381,6 +385,46 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         self.assertEqual(utils.mean([]), 0)
         self.assertEqual(utils.mean([1.7, 2, 3.0, 4, 5.99999]), 3.339998)
         self.assertEqual(utils.mean([0.1, 0.3]), 0.2)
+
+    @classmethod
+    def _get_users_xml(cls):
+        """
+        :return: String with sample XML data.
+        """
+        return etree.fromstring(
+            """
+            <intranet>
+                <server>
+                    <host>intranet.stxnext.pl</host>
+                    <port>443</port>
+                    <protocol>https</protocol>
+                </server>
+                <users>
+                    <user id="141">
+                        <avatar>/api/images/users/141</avatar>
+                        <name>Adam P.</name>
+                    </user>
+                    <user id="176">
+                        <avatar>/api/images/users/176</avatar>
+                        <name>Adrian K.</name>
+                    </user>
+                </users>
+            </intranet>
+            """
+        )
+
+    def test_update_users_source(self):
+        """
+        Check if remote XML exists and content type is XML.
+        """
+        data = self._get_users_xml()
+        self.assertTrue(
+            isinstance(
+                data,
+                lxml.etree._Element  # pylint: disable=protected-access
+            ),
+            msg="Wrong XML returned."
+        )
 
 
 def suite():

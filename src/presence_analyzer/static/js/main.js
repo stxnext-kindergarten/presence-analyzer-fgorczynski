@@ -2,6 +2,10 @@ google.load("visualization", "1", {packages:["corechart", "timeline"], 'language
 
 (function($) {
     $(document).ready(function(){
+        function changeUserAvatar(userId) {
+            var intranetUrl = 'https://intranet.stxnext.pl:443/api/images/users/' + userId;
+            jQuery('.avatar').html(jQuery('<img src="' + intranetUrl + '" alt="' + intranetUrl + '" />'));
+        }
         var loading = $('#loading');
         $.getJSON("/api/v1/users", function(result) {
             var dropdown = $("#user_id");
@@ -17,7 +21,7 @@ google.load("visualization", "1", {packages:["corechart", "timeline"], 'language
             if(selected_user) {
                 loading.show();
                 chart_div.hide();
-                
+                changeUserAvatar(selected_user);
                 $.getJSON("/api/v1/presence_start_end/" + selected_user, function(result) {
                     $.each(result, function(index, value) {
                         // convert returned datetime strings to valid JavaScript Date object

@@ -2,6 +2,7 @@
 .coverage
 cover/
 *.un~
+.idea
 .installed.cfg
 bin/
 develop-eggs/

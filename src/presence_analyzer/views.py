@@ -4,8 +4,9 @@ Defines views.
 """
 
 import calendar
+import logging
 from flask import redirect, abort
-
+from lxml import etree
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
     jsonify,
@@ -14,8 +15,9 @@ from presence_analyzer.utils import (
     group_by_weekday,
     group_user_avgs_weekday,
 )
-
-import logging
+from presence_analyzer.config import (
+    BASE_XML_FILE,
+)
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
@@ -33,9 +35,24 @@ def users_view():
     """
     Users listing for dropdown.
     """
+    xmlfile = open(BASE_XML_FILE, 'r')
+    root = etree.fromstring(xmlfile.read())  # pylint: disable=no-member
+    xmlfile.close()
+
+    def get_username(i):
+        """
+        Get user ID
+
+        Return user name from XML file or default string.
+        """
+        user = root[1].xpath("user[@id='{}']".format(i))
+        if user:
+            return user[0][1].text
+        return "User {}".format(i)
+
     data = get_data()
     return [
-        {'user_id': i, 'name': 'User {0}'.format(str(i))}
+        {'user_id': i, 'name': get_username(i)}
         for i in data.keys()
     ]
 

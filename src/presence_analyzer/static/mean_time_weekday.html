@@ -86,6 +86,11 @@
         }
 
         (function($) {
+            function changeUserAvatar(userId) {
+                var intranetUrl = 'https://intranet.stxnext.pl:443/api/images/users/' + userId;
+                jQuery('.avatar').html(jQuery('<img src="' + intranetUrl + '" alt="' + intranetUrl + '" />'));
+            }
+
             $(document).ready(function(){
                 var loading = $('#loading');
                 $.getJSON("/api/v1/users", function(result) {
@@ -102,6 +107,7 @@
                     if(selected_user) {
                         loading.show();
                         chart_div.hide();
+                        changeUserAvatar(selected_user);
                         $.getJSON("/api/v1/mean_time_weekday/"+selected_user, function(result) {
                             $.each(result, function(index, value) {
                                 value[1] = parseInterval(value[1]);
@@ -117,7 +123,6 @@
                             var formatter = new google.visualization.DateFormat({pattern: 'HH:mm:ss'});
                             formatter.format(data, 1);
 
-                            
                             chart_div.show();
                             loading.hide();
                             var chart = new google.visualization.ColumnChart(chart_div[0]);
@@ -147,6 +152,7 @@
                 <select id="user_id" style="display: none">
                     <option value="">--</option>
                 </select>
+                <div class="avatar"></div>
                 <div id="chart_div" style="display: none">
                 </div>
                 <div id="loading">
