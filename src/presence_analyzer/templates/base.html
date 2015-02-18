@@ -1,3 +1,8 @@
+<%def name="isselected(tab)">
+%if tab == self.attr.active_tab:
+    id="selected"
+%endif
+</%def>
 <!doctype html>
 <html lang="en">
     <meta charset="utf-8" />
@@ -22,13 +27,13 @@
         <div id="header">
             <h1>Presence analyzer</h1>
             <ul>
-                <li><a href="${url_for('weekday')}">Presence by weekday</a></li>
-                <li><a href="${url_for('mean_time')}">Presence mean time</a></li>
-                <li><a href="${url_for('weekday')}">Presence start-end</a></li>
+                <li ${isselected("weekday")}><a href="${url_for('weekday')}">Presence by weekday</a></li>
+                <li ${isselected("mean_time")}><a href="${url_for('mean_time')}">Presence mean time</a></li>
+                <li ${isselected("startend")}><a href="${url_for('startend')}">Presence start-end</a></li>
             </ul>
         </div>
         </%block>
-        
+
         <%block name="content">
         <div id="content">
             <h2>Presence by weekday</h2>

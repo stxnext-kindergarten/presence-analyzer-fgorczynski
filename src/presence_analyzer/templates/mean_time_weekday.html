@@ -1,18 +1,10 @@
+<%!
+ active_tab = "mean_time"
+%>
+
 <%inherit file="base.html"/>
 
 <%block name="title">Presence analyzer - Presence by mean time</%block>
-
-<%block name="header">
-<div id="header">
-    <h1>Presence analyzer</h1>
-    
-    <ul>
-        <li><a href="${url_for('weekday')}">Presence by weekday</a></li>
-        <li id="selected"><a href="${url_for('mean_time')}">Presence mean time</a></li>
-        <li><a href="${url_for('startend')}">Presence start-end</a></li>
-    </ul>
-</div>
-</%block>
 
 <%block name="scripts">
 ${parent.scripts()}
