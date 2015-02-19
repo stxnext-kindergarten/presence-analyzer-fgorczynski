@@ -1,3 +1,14 @@
+<%!
+ active_tab = "startend"
+%>
+
+<%inherit file="base.html"/>
+
+<%block name="title">Presence analyzer - Presence Start-End Average</%block>
+
+<%block name="scripts">
+${parent.scripts()}
+<script>
 google.load("visualization", "1", {packages:["corechart", "timeline"], 'language': 'pl'});
 
 (function($) {
@@ -50,3 +61,5 @@ google.load("visualization", "1", {packages:["corechart", "timeline"], 'language
         });
     });
 })(jQuery);
+</script>
+</%block>
