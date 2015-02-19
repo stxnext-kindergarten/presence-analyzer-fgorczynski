@@ -5,8 +5,9 @@ Defines views.
 
 import calendar
 import logging
-from flask import redirect, abort
 from lxml import etree
+from flask import abort
+import flask_mako as fmako  # pylint: disable=unused-import
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
     jsonify,
@@ -22,11 +23,27 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 @app.route('/')
-def mainpage():
+def weekday():
     """
-    Redirects to front page.
+    Renders Presence by weekday page.
     """
-    return redirect('/static/presence_weekday.html')
+    return fmako.render_template('presence_weekday.html')
+
+
+@app.route('/mean-time')
+def mean_time():
+    """
+    Renders Presence mean time page.
+    """
+    return fmako.render_template('mean_time_weekday.html')
+
+
+@app.route('/start-end')
+def startend():
+    """
+    Renders Presence start-end page.
+    """
+    return fmako.render_template('presence_start_end.html')
 
 
 @app.route('/api/v1/users', methods=['GET'])
@@ -70,8 +87,8 @@ def mean_time_weekday_view(user_id):
 
     weekdays = group_by_weekday(data[user_id])
     result = [
-        (calendar.day_abbr[weekday], mean(intervals))
-        for weekday, intervals in enumerate(weekdays)
+        (calendar.day_abbr[wday], mean(intervals))
+        for wday, intervals in enumerate(weekdays)
     ]
 
     return result
@@ -90,8 +107,8 @@ def presence_weekday_view(user_id):
 
     weekdays = group_by_weekday(data[user_id])
     result = [
-        (calendar.day_abbr[weekday], sum(intervals))
-        for weekday, intervals in enumerate(weekdays)
+        (calendar.day_abbr[wday], sum(intervals))
+        for wday, intervals in enumerate(weekdays)
     ]
 
     result.insert(0, ('Weekday', 'Presence (s)'))

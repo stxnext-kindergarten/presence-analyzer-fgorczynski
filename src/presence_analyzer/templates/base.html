@@ -1,0 +1,58 @@
+<%def name="isselected(tab)">
+%if tab == self.attr.active_tab:
+    id="selected"
+%endif
+</%def>
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" />
+    <title><%block name="title">Presence analyzer</%block></title>
+    
+    <%block name="meta">
+    <meta name="keywords" content="" />
+    <meta name="description" content=""/>
+    <meta name="author" content="STX Next sp. z o.o."/>
+    <meta name="viewport" content="width=device-width; initial-scale=1.0" />
+    </%block>
+    
+    <%block name="styles">
+    <link href="${url_for('static', filename='/css/normalize.css')}" media="all" rel="stylesheet" />
+    <link href="${url_for('static', filename='/css/screen.css')}" media="all" rel="stylesheet" />
+    </%block>
+</head>
+
+<body>
+    <div id="main">
+        <%block name="header">
+        <div id="header">
+            <h1>Presence analyzer</h1>
+            <ul>
+                <li ${isselected("weekday")}><a href="${url_for('weekday')}">Presence by weekday</a></li>
+                <li ${isselected("mean_time")}><a href="${url_for('mean_time')}">Presence mean time</a></li>
+                <li ${isselected("startend")}><a href="${url_for('startend')}">Presence start-end</a></li>
+            </ul>
+        </div>
+        </%block>
+
+        <%block name="content">
+        <div id="content">
+            <h2>Presence by weekday</h2>
+            <p>
+                <select id="user_id" style="display: none">
+                    <option value="">--</option>
+                </select>
+                <div id="chart_div" style="display: none">
+                </div>
+                <div id="loading">
+                    <img src="${url_for('static', filename='/img/loading.gif')}" />
+                </div>
+            </p>
+        </div>
+        </%block>
+    </div>
+    
+    <%block name="scripts">
+    <script src="${url_for('static', filename='js/jquery.min.js')}"></script>
+    <script src="https://www.google.com/jsapi"></script>
+    </%block>
+</body>

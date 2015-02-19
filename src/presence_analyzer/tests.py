@@ -54,8 +54,7 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         Test main page redirect.
         """
         resp = self.client.get('/')
-        self.assertEqual(resp.status_code, 302)
-        assert resp.headers['Location'].endswith('/presence_weekday.html')
+        self.assertEqual(resp.status_code, 200)
 
     def test_api_users(self):
         """
