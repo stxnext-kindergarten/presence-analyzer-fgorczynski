@@ -4,7 +4,6 @@ Presence analyzer unit tests.
 """
 import datetime
 import json
-import lxml
 from lxml import etree
 import os.path
 import unittest
@@ -13,7 +12,6 @@ from presence_analyzer import (  # pylint: disable=unused-import
     utils,
     views,
 )
-# from presence_analyzer.config import *
 from presence_analyzer.main import app
 from presence_analyzer.utils import jsonify
 
@@ -312,13 +310,13 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         app.config.update({'DATA_CSV': TEST_EMPTY_DATA_CSV})
         data = utils.get_data()
         self.assertEqual(len(data[10]), 3)
-        self.assertEqual(len(data[11]), 4)
+        self.assertEqual(len(data[11]), 6)
 
         # wrong data fixtures
         app.config.update({'DATA_CSV': TEST_WRONG_DATA_CSV})
         data = utils.get_data()
-        self.assertEqual(len(data[10]), 2)
-        self.assertEqual(len(data[11]), 5)
+        self.assertEqual(len(data[10]), 3)
+        self.assertEqual(len(data[11]), 6)
 
         # recover valid data
         main.app.config.update({'DATA_CSV': tmp_data})
@@ -420,10 +418,16 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         self.assertTrue(
             isinstance(
                 data,
-                lxml.etree._Element  # pylint: disable=protected-access
+                etree._Element  # pylint: disable=protected-access
             ),
             msg="Wrong XML returned."
         )
+
+    def test_cache_method(self):
+        """
+        Test if cache decorator return valid cache.
+        """
+        pass
 
 
 def suite():
