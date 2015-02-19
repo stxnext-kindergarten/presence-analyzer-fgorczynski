@@ -3,9 +3,9 @@
 Flask app initialization.
 """
 from flask import Flask
-from flask.ext.mako import MakoTemplates
+import flask_mako as fmako  # pylint: disable=unused-import
+from flask_mako import MakoTemplates
 
 app = Flask(__name__)  # pylint: disable=invalid-name
-mako = MakoTemplates(app)
+mako = MakoTemplates(app)  # pylint: disable=invalid-name
 app.template_folder = "templates"
-# content.mako.init_app(app)

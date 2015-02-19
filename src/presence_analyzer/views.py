@@ -4,8 +4,9 @@ Defines views.
 """
 
 import calendar
-from flask import redirect, abort
-from flask.ext.mako import render_template
+from flask import abort
+import flask_mako as fmako  # pylint: disable=unused-import
+from flask_mako import render_template
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
     jsonify,
@@ -69,8 +70,8 @@ def mean_time_weekday_view(user_id):
 
     weekdays = group_by_weekday(data[user_id])
     result = [
-        (calendar.day_abbr[weekday], mean(intervals))
-        for weekday, intervals in enumerate(weekdays)
+        (calendar.day_abbr[wday], mean(intervals))
+        for wday, intervals in enumerate(weekdays)
     ]
 
     return result
@@ -89,8 +90,8 @@ def presence_weekday_view(user_id):
 
     weekdays = group_by_weekday(data[user_id])
     result = [
-        (calendar.day_abbr[weekday], sum(intervals))
-        for weekday, intervals in enumerate(weekdays)
+        (calendar.day_abbr[wday], sum(intervals))
+        for wday, intervals in enumerate(weekdays)
     ]
 
     result.insert(0, ('Weekday', 'Presence (s)'))
