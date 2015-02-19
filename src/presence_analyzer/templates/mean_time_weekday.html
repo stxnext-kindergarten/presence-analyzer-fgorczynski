@@ -34,6 +34,7 @@ ${parent.scripts()}
                 if(selected_user) {
                     loading.show();
                     chart_div.hide();
+                    changeUserAvatar(selected_user);
                     $.getJSON("/api/v1/mean_time_weekday/"+selected_user, function(result) {
                         $.each(result, function(index, value) {
                             value[1] = parseInterval(value[1]);

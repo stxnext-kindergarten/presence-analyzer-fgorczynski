@@ -8,6 +8,7 @@ from datetime import datetime
 from functools import wraps
 from json import dumps
 import logging
+
 from flask import Response
 
 from presence_analyzer.main import app

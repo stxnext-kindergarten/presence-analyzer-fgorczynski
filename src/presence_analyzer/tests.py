@@ -4,7 +4,6 @@ Presence analyzer unit tests.
 """
 import datetime
 import json
-import lxml
 from lxml import etree
 import os.path
 import unittest
@@ -13,7 +12,6 @@ from presence_analyzer import (  # pylint: disable=unused-import
     utils,
     views,
 )
-# from presence_analyzer.config import *
 from presence_analyzer.main import app
 from presence_analyzer.utils import jsonify
 
@@ -420,7 +418,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         self.assertTrue(
             isinstance(
                 data,
-                lxml.etree._Element  # pylint: disable=protected-access
+                etree._Element  # pylint: disable=protected-access
             ),
             msg="Wrong XML returned."
         )
