@@ -6,7 +6,6 @@ Defines views.
 import calendar
 from flask import abort
 import flask_mako as fmako  # pylint: disable=unused-import
-from flask_mako import render_template
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
     jsonify,
@@ -25,7 +24,7 @@ def weekday():
     """
     Renders Presence by weekday page.
     """
-    return render_template('presence_weekday.html')
+    return fmako.render_template('presence_weekday.html')
 
 
 @app.route('/mean-time')
@@ -33,7 +32,7 @@ def mean_time():
     """
     Renders Presence mean time page.
     """
-    return render_template('mean_time_weekday.html')
+    return fmako.render_template('mean_time_weekday.html')
 
 
 @app.route('/start-end')
@@ -41,7 +40,7 @@ def startend():
     """
     Renders Presence start-end page.
     """
-    return render_template('presence_start_end.html')
+    return fmako.render_template('presence_start_end.html')
 
 
 @app.route('/api/v1/users', methods=['GET'])
