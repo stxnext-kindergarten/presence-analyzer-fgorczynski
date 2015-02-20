@@ -28,7 +28,7 @@ google.load("visualization", "1", {packages:["corechart", "timeline"], 'language
             if(selected_user) {
                 loading.show();
                 chart_div.hide();
-                
+                changeUserAvatar(selected_user);
                 $.getJSON("/api/v1/presence_start_end/" + selected_user, function(result) {
                     $.each(result, function(index, value) {
                         // convert returned datetime strings to valid JavaScript Date object

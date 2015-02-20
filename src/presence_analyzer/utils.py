@@ -7,10 +7,12 @@ import csv
 from datetime import datetime
 from functools import wraps
 from json import dumps
+import logging
+
 from flask import Response
+
 from presence_analyzer.main import app
 
-import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -34,19 +36,15 @@ def jsonify(function):
 
 
 def get_data():
-    """
+    u"""
     Extracts presence data from CSV file and groups it by user_id.
 
     It creates structure like this:
     data = {
         'user_id': {
-            datetime.date(2013, 10, 1): {
-                'start': datetime.time(9, 0, 0),
-                'end': datetime.time(17, 30, 0),
-            },
-            datetime.date(2013, 10, 2): {
-                'start': datetime.time(8, 30, 0),
-                'end': datetime.time(16, 45, 0),
+            datetime.date(2015, 1, 1): {
+                'start': datetime.time(0, 0, 0),
+                'end': datetime.time(23, 59, 59),
             },
         }
     }

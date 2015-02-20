@@ -4,18 +4,22 @@ Defines views.
 """
 
 import calendar
+import logging
+
+from lxml import etree
 from flask import abort
 import flask_mako as fmako  # pylint: disable=unused-import
+
+from presence_analyzer.config import BASE_XML_FILE
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
-    jsonify,
     get_data,
-    mean,
     group_by_weekday,
     group_user_avgs_weekday,
+    jsonify,
+    mean,
 )
 
-import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
@@ -49,9 +53,24 @@ def users_view():
     """
     Users listing for dropdown.
     """
+    root = {}
+    with open(BASE_XML_FILE, 'r') as xmlfile:
+        root = etree.fromstring(xmlfile.read())  # pylint: disable=no-member
+
+    def get_username(i):
+        """
+        Get user ID
+
+        Return user name from XML file or default string.
+        """
+        user = root[1].xpath("user[@id='{}']".format(i))
+        if user:
+            return user[0][1].text
+        return "User {}".format(i)
+
     data = get_data()
     return [
-        {'user_id': i, 'name': 'User {0}'.format(str(i))}
+        {'user_id': i, 'name': get_username(i)}
         for i in data.keys()
     ]
 
