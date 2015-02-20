@@ -8,10 +8,8 @@ from datetime import datetime
 from functools import wraps
 from json import dumps
 import logging
-from threading import Lock
 
 from flask import Response
-from werkzeug.contrib.cache import SimpleCache
 
 from presence_analyzer.main import app
 
@@ -19,8 +17,6 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 DEFAULT_DATETIME = str(datetime(1, 1, 1, 0, 0, 0))
-CACHE_LIFETIME = 10
-CACHE = SimpleCache()
 
 
 def jsonify(function):
@@ -39,37 +35,6 @@ def jsonify(function):
     return inner
 
 
-def cache(lifetime):
-    u"""
-    Create cache with users data or return cached values.
-    :param
-    """
-    def cache_decorator(func):
-        u"""
-        Return cache decorator with lifetime argument.
-        """
-        def func_wrapper(*args, **kwargs):
-            u"""
-            Return cache decorator.
-            """
-            lock = Lock()
-            cache_key = "{}_{}_{}".format(
-                repr(func),
-                repr(args),
-                repr(sorted(kwargs))
-            )
-            data = CACHE.get(cache_key)
-            if data is None:
-                lock.acquire(True)
-                data = func(*args, **kwargs)
-                CACHE.set(cache_key, data, timeout=lifetime)
-                lock.release()
-            return data
-        return func_wrapper
-    return cache_decorator
-
-
-@cache(CACHE_LIFETIME)
 def get_data():
     u"""
     Extracts presence data from CSV file and groups it by user_id.

@@ -310,13 +310,13 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         app.config.update({'DATA_CSV': TEST_EMPTY_DATA_CSV})
         data = utils.get_data()
         self.assertEqual(len(data[10]), 3)
-        self.assertEqual(len(data[11]), 6)
+        self.assertEqual(len(data[11]), 4)
 
         # wrong data fixtures
         app.config.update({'DATA_CSV': TEST_WRONG_DATA_CSV})
         data = utils.get_data()
-        self.assertEqual(len(data[10]), 3)
-        self.assertEqual(len(data[11]), 6)
+        self.assertEqual(len(data[10]), 2)
+        self.assertEqual(len(data[11]), 5)
 
         # recover valid data
         main.app.config.update({'DATA_CSV': tmp_data})
